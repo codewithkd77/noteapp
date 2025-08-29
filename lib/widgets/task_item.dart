@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../utils/app_theme.dart';
+import '../providers/task_provider.dart';
 
 class TaskItem extends StatefulWidget {
   final Task task;
@@ -47,70 +49,45 @@ class _TaskItemState extends State<TaskItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header - only show time for non-default tasks
-            if (!widget.task.isDefault) ...[
-              Row(
-                children: [
-                  // Time
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      widget.task.timeString,
-                      style: AppTextStyles.caption.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+            // Header with time
+            Row(
+              children: [
+                // Time
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    widget.task.timeString,
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
                     ),
                   ),
+                ),
 
-                  const Spacer(),
+                const Spacer(),
 
-                  // Delete button for custom tasks
-                  GestureDetector(
-                    onTap: () => _showDeleteConfirmation(context),
-                    child: Icon(
-                      Icons.delete_outline,
-                      size: AppDimensions.iconSmall,
-                      color: AppColors.error,
-                    ),
+                // Delete button for custom tasks
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _showDeleteConfirmation(context);
+                  },
+                  child: Icon(
+                    Icons.delete_outline,
+                    size: AppDimensions.iconSmall,
+                    color: AppColors.error,
                   ),
-                ],
-              ),
-              const SizedBox(height: AppDimensions.paddingMedium),
-            ],
-
-            // Royal Routine header for default tasks
-            if (widget.task.isDefault) ...[
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '⚜ Royal Routine',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.warning,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimensions.paddingMedium),
-            ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppDimensions.paddingMedium),
 
             // Task content based on type
             _buildTaskContent(),
@@ -137,6 +114,7 @@ class _TaskItemState extends State<TaskItem> {
         // Checkbox
         GestureDetector(
           onTap: () {
+            HapticFeedback.lightImpact();
             final updatedTask = widget.task;
             updatedTask.isCompleted = !updatedTask.isCompleted;
             widget.onTaskUpdated(updatedTask);
@@ -273,6 +251,25 @@ class _TaskItemState extends State<TaskItem> {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    // Check if this task is part of a daily series by looking for tasks with the same title
+    final taskProvider = context.read<TaskProvider>();
+    final tasksWithSameTitle = taskProvider.tasks
+        .where(
+          (task) =>
+              task.title == widget.task.title && task.id != widget.task.id,
+        )
+        .toList();
+
+    final isDailyTask = tasksWithSameTitle.isNotEmpty;
+
+    if (isDailyTask) {
+      _showDailyTaskDeleteOptions(context);
+    } else {
+      _showRegularDeleteConfirmation(context);
+    }
+  }
+
+  void _showRegularDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -285,6 +282,7 @@ class _TaskItemState extends State<TaskItem> {
           ),
           TextButton(
             onPressed: () {
+              HapticFeedback.mediumImpact();
               Navigator.of(context).pop();
               widget.onDelete();
             },
@@ -294,5 +292,51 @@ class _TaskItemState extends State<TaskItem> {
         ],
       ),
     );
+  }
+
+  void _showDailyTaskDeleteOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Daily Task'),
+        content: const Text(
+          'This is a daily recurring task. How would you like to delete it?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).pop();
+              _deleteTodayOnly(context);
+            },
+            child: const Text('Today Only'),
+          ),
+          TextButton(
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              Navigator.of(context).pop();
+              _deleteAllDaily(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('All Daily Tasks'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteTodayOnly(BuildContext context) {
+    // Just delete this specific task
+    widget.onDelete();
+  }
+
+  void _deleteAllDaily(BuildContext context) {
+    // Delete all tasks with the same title
+    final taskProvider = context.read<TaskProvider>();
+    taskProvider.deleteDailyTasks(widget.task.title);
   }
 }

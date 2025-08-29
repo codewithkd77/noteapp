@@ -38,7 +38,7 @@ class CategoryEntry extends HiveObject {
   String id;
 
   @HiveField(1)
-  String content;
+  String content; // Keep for backward compatibility
 
   @HiveField(2)
   DateTime createdAt;
@@ -46,11 +46,23 @@ class CategoryEntry extends HiveObject {
   @HiveField(3)
   DateTime? updatedAt;
 
+  @HiveField(4)
+  String? title;
+
+  @HiveField(5)
+  String? description;
+
+  @HiveField(6)
+  String? link;
+
   CategoryEntry({
     required this.id,
     required this.content,
     required this.createdAt,
     this.updatedAt,
+    this.title,
+    this.description,
+    this.link,
   });
 
   // Get formatted timestamp

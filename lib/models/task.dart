@@ -42,9 +42,6 @@ class Task extends HiveObject {
   @HiveField(8)
   double? numberValue;
 
-  @HiveField(9)
-  bool isDefault;
-
   Task({
     required this.id,
     required this.title,
@@ -55,7 +52,6 @@ class Task extends HiveObject {
     this.taskType = TaskType.checkbox,
     this.textValue,
     this.numberValue,
-    this.isDefault = false,
   });
 
   // Get formatted time string (e.g., "10:30 AM")

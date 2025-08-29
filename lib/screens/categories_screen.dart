@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
 import '../utils/app_theme.dart';
@@ -87,6 +88,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   void _showAddCategoryDialog() {
+    HapticFeedback.lightImpact();
     showDialog(
       context: context,
       builder: (context) => const AddCategoryDialog(),

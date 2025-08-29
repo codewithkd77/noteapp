@@ -70,13 +70,16 @@ class CategoryEntryAdapter extends TypeAdapter<CategoryEntry> {
       content: fields[1] as String,
       createdAt: fields[2] as DateTime,
       updatedAt: fields[3] as DateTime?,
+      title: fields[4] as String?,
+      description: fields[5] as String?,
+      link: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CategoryEntry obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -84,7 +87,13 @@ class CategoryEntryAdapter extends TypeAdapter<CategoryEntry> {
       ..writeByte(2)
       ..write(obj.createdAt)
       ..writeByte(3)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(4)
+      ..write(obj.title)
+      ..writeByte(5)
+      ..write(obj.description)
+      ..writeByte(6)
+      ..write(obj.link);
   }
 
   @override

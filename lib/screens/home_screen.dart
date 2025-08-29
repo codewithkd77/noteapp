@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/task_provider.dart';
-import '../models/task.dart';
 import '../utils/app_theme.dart';
 import '../utils/date_utils.dart' as date_utils;
 import '../widgets/task_item.dart';
 import '../widgets/add_task_dialog.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/royal_routine_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showAddTaskDialog() {
+    HapticFeedback.lightImpact();
     showDialog(
       context: context,
       builder: (context) => AddTaskDialog(selectedDate: _currentDate),
@@ -126,124 +126,58 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDayView(DateTime date) {
     return Consumer<TaskProvider>(
       builder: (context, taskProvider, child) {
-        // Ensure Royal Routine tasks exist for this date
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          taskProvider.ensureRoyalRoutineTasksForDate(date);
-        });
-
-        // Get regular tasks (non-Royal Routine) for this date
-        final regularTasks =
+        // Get all tasks for this date
+        final tasks =
             taskProvider.tasks
                 .where(
-                  (task) =>
-                      !task.isDefault &&
-                      date_utils.DateUtils.isSameDay(task.dateTime, date),
+                  (task) => date_utils.DateUtils.isSameDay(task.dateTime, date),
                 )
                 .toList()
               ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
 
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              // Royal Routine Widget
-              RoyalRoutineWidget(selectedDate: date),
-
-              // Regular Tasks Section
-              if (regularTasks.isNotEmpty) ...[
-                Container(
-                  margin: const EdgeInsets.all(AppDimensions.paddingMedium),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Regular Tasks Header
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimensions.paddingMedium,
-                          vertical: AppDimensions.paddingSmall,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(
-                            AppDimensions.radiusMedium,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.task_alt,
-                              color: AppColors.accent,
-                              size: 20,
-                            ),
-                            const SizedBox(width: AppDimensions.paddingSmall),
-                            Text(
-                              'Daily Tasks',
-                              style: AppTextStyles.headline2.copyWith(
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: AppDimensions.paddingMedium),
-
-                      // Regular Tasks List
-                      ...regularTasks
-                          .map(
-                            (task) => Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppDimensions.paddingSmall,
-                              ),
-                              child: TaskItem(
-                                task: task,
-                                onTaskUpdated: (updatedTask) =>
-                                    taskProvider.updateTask(updatedTask),
-                                onDelete: () =>
-                                    taskProvider.deleteTask(task.id),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ],
+        if (tasks.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.event_available,
+                  size: 64,
+                  color: AppColors.textHint,
+                ),
+                const SizedBox(height: AppDimensions.paddingMedium),
+                Text(
+                  'No tasks for this day',
+                  style: AppTextStyles.headline2.copyWith(
+                    color: AppColors.textHint,
                   ),
                 ),
-              ] else ...[
-                // Empty state for regular tasks
-                Container(
-                  margin: const EdgeInsets.all(AppDimensions.paddingMedium),
-                  padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(
-                      AppDimensions.radiusMedium,
-                    ),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.add_task, size: 48, color: AppColors.textHint),
-                      const SizedBox(height: AppDimensions.paddingMedium),
-                      Text(
-                        'No daily tasks yet',
-                        style: AppTextStyles.headline2.copyWith(
-                          color: AppColors.textHint,
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.paddingSmall),
-                      Text(
-                        'Tap the + button to add your personal tasks',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textHint,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                const SizedBox(height: AppDimensions.paddingSmall),
+                Text(
+                  'Tap the + button to add a task',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textHint,
                   ),
                 ),
               ],
-            ],
-          ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+          itemCount: tasks.length,
+          separatorBuilder: (context, index) =>
+              const SizedBox(height: AppDimensions.paddingSmall),
+          itemBuilder: (context, index) {
+            final task = tasks[index];
+            return TaskItem(
+              task: task,
+              onTaskUpdated: (updatedTask) =>
+                  taskProvider.updateTask(updatedTask),
+              onDelete: () => taskProvider.deleteTask(task.id),
+            );
+          },
         );
       },
     );

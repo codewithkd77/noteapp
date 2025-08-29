@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
 import '../utils/app_theme.dart';
@@ -79,11 +80,21 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          onPressed: _isLoading
+              ? null
+              : () {
+                  HapticFeedback.lightImpact();
+                  Navigator.of(context).pop();
+                },
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _isLoading ? null : _addCategory,
+          onPressed: _isLoading
+              ? null
+              : () {
+                  HapticFeedback.mediumImpact();
+                  _addCategory();
+                },
           child: _isLoading
               ? const SizedBox(
                   width: 16,

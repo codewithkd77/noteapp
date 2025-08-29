@@ -64,13 +64,22 @@ class CategoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addCategoryEntry(String categoryId, String content) async {
+  Future<void> addCategoryEntry(
+    String categoryId,
+    String content, {
+    String? title,
+    String? description,
+    String? link,
+  }) async {
     try {
       final category = _categories.firstWhere((c) => c.id == categoryId);
       final entry = CategoryEntry(
         id: 'entry_${DateTime.now().millisecondsSinceEpoch}',
-        content: content,
+        content: content.isEmpty ? (title ?? 'Untitled') : content,
         createdAt: DateTime.now(),
+        title: title,
+        description: description,
+        link: link,
       );
 
       category.entries.add(entry);
@@ -83,15 +92,22 @@ class CategoryProvider extends ChangeNotifier {
   Future<void> updateCategoryEntry(
     String categoryId,
     String entryId,
-    String newContent,
-  ) async {
+    String newContent, {
+    String? title,
+    String? description,
+    String? link,
+  }) async {
     try {
       final category = _categories.firstWhere((c) => c.id == categoryId);
       final entryIndex = category.entries.indexWhere((e) => e.id == entryId);
 
       if (entryIndex != -1) {
-        category.entries[entryIndex].content = newContent;
-        category.entries[entryIndex].updatedAt = DateTime.now();
+        final entry = category.entries[entryIndex];
+        entry.content = newContent.isEmpty ? (title ?? 'Untitled') : newContent;
+        entry.title = title;
+        entry.description = description;
+        entry.link = link;
+        entry.updatedAt = DateTime.now();
         await updateCategory(category);
       }
     } catch (e) {
