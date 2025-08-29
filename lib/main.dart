@@ -31,7 +31,7 @@ class DailyPlannerApp extends StatelessWidget {
         title: 'Daily Planner',
         theme: AppTheme.lightTheme,
         home: const HomeScreen(),
-  debugShowCheckedModeBanner: true,
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

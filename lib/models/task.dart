@@ -2,6 +2,17 @@ import 'package:hive/hive.dart';
 
 part 'task.g.dart';
 
+// Task type enum
+@HiveType(typeId: 4)
+enum TaskType {
+  @HiveField(0)
+  checkbox,
+  @HiveField(1)
+  text,
+  @HiveField(2)
+  number,
+}
+
 @HiveType(typeId: 0)
 class Task extends HiveObject {
   @HiveField(0)
@@ -22,6 +33,18 @@ class Task extends HiveObject {
   @HiveField(5)
   DateTime? updatedAt;
 
+  @HiveField(6)
+  TaskType taskType;
+
+  @HiveField(7)
+  String? textValue;
+
+  @HiveField(8)
+  double? numberValue;
+
+  @HiveField(9)
+  bool isDefault;
+
   Task({
     required this.id,
     required this.title,
@@ -29,6 +52,10 @@ class Task extends HiveObject {
     this.isCompleted = false,
     required this.createdAt,
     this.updatedAt,
+    this.taskType = TaskType.checkbox,
+    this.textValue,
+    this.numberValue,
+    this.isDefault = false,
   });
 
   // Get formatted time string (e.g., "10:30 AM")

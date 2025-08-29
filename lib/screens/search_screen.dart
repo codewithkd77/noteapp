@@ -137,8 +137,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     if (result is Task) {
                       return TaskItem(
                         task: result,
-                        onTap: () {
-                          // TODO: Navigate to task or toggle completion
+                        onTaskUpdated: (updatedTask) {
+                          // TODO: Update task in provider
                         },
                         onDelete: () {
                           // TODO: Delete task

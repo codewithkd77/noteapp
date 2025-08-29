@@ -18,6 +18,7 @@ class DatabaseService {
 
     // Register adapters
     Hive.registerAdapter(TaskAdapter());
+    Hive.registerAdapter(TaskTypeAdapter());
     Hive.registerAdapter(CategoryAdapter());
     Hive.registerAdapter(CategoryEntryAdapter());
     Hive.registerAdapter(UserSettingsAdapter());
@@ -93,10 +94,12 @@ class DatabaseService {
 
   static List<Task> getTasksForDate(DateTime date) {
     return _tasksBox!.values
-        .where((task) =>
-            task.dateTime.year == date.year &&
-            task.dateTime.month == date.month &&
-            task.dateTime.day == date.day)
+        .where(
+          (task) =>
+              task.dateTime.year == date.year &&
+              task.dateTime.month == date.month &&
+              task.dateTime.day == date.day,
+        )
         .toList()
       ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
   }
@@ -170,7 +173,9 @@ class DatabaseService {
   // Get tasks for a specific month
   static List<Task> getTasksForMonth(int year, int month) {
     return _tasksBox!.values
-        .where((task) => task.dateTime.year == year && task.dateTime.month == month)
+        .where(
+          (task) => task.dateTime.year == year && task.dateTime.month == month,
+        )
         .toList()
       ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
   }

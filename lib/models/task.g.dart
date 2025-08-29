@@ -23,13 +23,17 @@ class TaskAdapter extends TypeAdapter<Task> {
       isCompleted: fields[3] as bool,
       createdAt: fields[4] as DateTime,
       updatedAt: fields[5] as DateTime?,
+      taskType: fields[6] as TaskType,
+      textValue: fields[7] as String?,
+      numberValue: fields[8] as double?,
+      isDefault: fields[9] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +45,15 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(4)
       ..write(obj.createdAt)
       ..writeByte(5)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(6)
+      ..write(obj.taskType)
+      ..writeByte(7)
+      ..write(obj.textValue)
+      ..writeByte(8)
+      ..write(obj.numberValue)
+      ..writeByte(9)
+      ..write(obj.isDefault);
   }
 
   @override
@@ -51,6 +63,50 @@ class TaskAdapter extends TypeAdapter<Task> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TaskAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class TaskTypeAdapter extends TypeAdapter<TaskType> {
+  @override
+  final int typeId = 4;
+
+  @override
+  TaskType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return TaskType.checkbox;
+      case 1:
+        return TaskType.text;
+      case 2:
+        return TaskType.number;
+      default:
+        return TaskType.checkbox;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, TaskType obj) {
+    switch (obj) {
+      case TaskType.checkbox:
+        writer.writeByte(0);
+        break;
+      case TaskType.text:
+        writer.writeByte(1);
+        break;
+      case TaskType.number:
+        writer.writeByte(2);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TaskTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
