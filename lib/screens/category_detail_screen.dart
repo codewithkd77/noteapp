@@ -6,7 +6,8 @@ import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/date_utils.dart' as date_utils;
-import '../widgets/add_category_entry_dialog.dart';
+import '../screens/add_category_entry_screen.dart';
+import '../widgets/add_subcategory_dialog.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final Category category;
@@ -87,12 +88,32 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                                   context,
                                 ).copyWith(color: Colors.white),
                               ),
-                              Text(
-                                '${category.entries.length} entries',
-                                style: AppTextStyles.bodyMedium(context)
-                                    .copyWith(
-                                      color: Colors.white.withOpacity(0.8),
-                                    ),
+                              Consumer<CategoryProvider>(
+                                builder: (context, categoryProvider, child) {
+                                  if (category.isMainCategory) {
+                                    final subcategories = categoryProvider
+                                        .getSubcategories(category.id);
+                                    return Text(
+                                      '${subcategories.length} subcategories',
+                                      style: AppTextStyles.bodyMedium(context)
+                                          .copyWith(
+                                            color: Colors.white.withOpacity(
+                                              0.8,
+                                            ),
+                                          ),
+                                    );
+                                  } else {
+                                    return Text(
+                                      '${category.entries.length} entries',
+                                      style: AppTextStyles.bodyMedium(context)
+                                          .copyWith(
+                                            color: Colors.white.withOpacity(
+                                              0.8,
+                                            ),
+                                          ),
+                                    );
+                                  }
+                                },
                               ),
                             ],
                           ),
@@ -112,56 +133,46 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
 
               // Entries list
               Expanded(
-                child: category.entries.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.note_add,
-                              size: 64,
-                              color: AppColors.textHint(context),
-                            ),
-                            const SizedBox(height: AppDimensions.paddingMedium),
-                            Text(
-                              'No entries yet',
-                              style: AppTextStyles.headline2(
-                                context,
-                              ).copyWith(color: AppColors.textHint(context)),
-                            ),
-                            const SizedBox(height: AppDimensions.paddingSmall),
-                            Text(
-                              'Add your first entry using the text field below',
-                              style: AppTextStyles.bodyMedium(
-                                context,
-                              ).copyWith(color: AppColors.textHint(context)),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.separated(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(
-                          AppDimensions.paddingMedium,
-                        ),
-                        itemCount: category.entries.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: AppDimensions.paddingMedium),
-                        itemBuilder: (context, index) {
-                          final entry = category.entries[index];
-                          return _buildEntryCard(entry, color);
-                        },
-                      ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Subcategories section (only for main categories)
+                      if (category.isMainCategory) ...[
+                        _buildSubcategoriesSection(category, color),
+                        const SizedBox(height: AppDimensions.paddingMedium),
+                      ],
+
+                      // Entries section (only for subcategories)
+                      if (!category.isMainCategory) ...[
+                        _buildEntriesSection(category, color),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showEntryDialog(),
-        backgroundColor: color,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Consumer<CategoryProvider>(
+        builder: (context, categoryProvider, child) {
+          final category = categoryProvider.getCategoryById(widget.category.id);
+          if (category == null) return const SizedBox.shrink();
+
+          return FloatingActionButton(
+            onPressed: () {
+              if (category.isMainCategory) {
+                // For main categories, add subcategory
+                _showAddSubcategoryDialog(category.id, category.color);
+              } else {
+                // For subcategories, add entry
+                _showEntryDialog();
+              }
+            },
+            backgroundColor: color,
+            child: const Icon(Icons.add, color: Colors.white),
+          );
+        },
       ),
     );
   }
@@ -309,42 +320,14 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   }
 
   void _editEntry(CategoryEntry entry) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController(text: entry.content);
-        return AlertDialog(
-          title: const Text('Edit Entry'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(labelText: 'Content'),
-            maxLines: null,
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final newContent = controller.text.trim();
-                if (newContent.isNotEmpty) {
-                  await context.read<CategoryProvider>().updateCategoryEntry(
-                    widget.category.id,
-                    entry.id,
-                    newContent,
-                  );
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                  }
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+    HapticFeedback.lightImpact();
+
+    // Navigate to the full-page entry screen for editing
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            AddCategoryEntryScreen(category: widget.category, entry: entry),
+      ),
     );
   }
 
@@ -454,35 +437,14 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
 
   void _showEntryDialog([CategoryEntry? entry]) async {
     HapticFeedback.lightImpact();
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => AddCategoryEntryDialog(entry: entry),
+
+    // Navigate to the full-page entry screen for both new and existing entries
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            AddCategoryEntryScreen(category: widget.category, entry: entry),
+      ),
     );
-
-    if (result != null) {
-      final categoryProvider = context.read<CategoryProvider>();
-
-      if (entry == null) {
-        // Add new entry
-        await categoryProvider.addCategoryEntry(
-          widget.category.id,
-          '', // Empty content since we're using title/description
-          title: result['title'],
-          description: result['description'],
-          link: result['link'],
-        );
-      } else {
-        // Update existing entry
-        await categoryProvider.updateCategoryEntry(
-          widget.category.id,
-          entry.id,
-          '', // Empty content since we're using title/description
-          title: result['title'],
-          description: result['description'],
-          link: result['link'],
-        );
-      }
-    }
   }
 
   Future<void> _openLink(String url) async {
@@ -526,5 +488,244 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         ).showSnackBar(SnackBar(content: Text('Error opening link: $e')));
       }
     }
+  }
+
+  Widget _buildSubcategoriesSection(Category category, Color color) {
+    return Consumer<CategoryProvider>(
+      builder: (context, categoryProvider, child) {
+        final subcategories = categoryProvider.getSubcategoriesWithEntries(
+          category.id,
+        );
+
+        return Container(
+          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.folder_open, color: color),
+                  const SizedBox(width: AppDimensions.paddingSmall),
+                  Text(
+                    'Subcategories',
+                    style: AppTextStyles.headline2(context),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () =>
+                        _showAddSubcategoryDialog(category.id, category.color),
+                    icon: const Icon(Icons.add_circle_outline),
+                    color: color,
+                    tooltip: 'Add Subcategory',
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimensions.paddingMedium),
+
+              if (subcategories.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusMedium,
+                    ),
+                    border: Border.all(color: color.withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.create_new_folder,
+                        color: color.withOpacity(0.7),
+                        size: 48,
+                      ),
+                      const SizedBox(height: AppDimensions.paddingSmall),
+                      Text(
+                        'No subcategories yet',
+                        style: AppTextStyles.bodyLarge(
+                          context,
+                        ).copyWith(color: color, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: AppDimensions.paddingSmall),
+                      Text(
+                        'Tap + to create subcategories for better organization',
+                        style: AppTextStyles.bodySmall(
+                          context,
+                        ).copyWith(color: AppColors.textSecondary(context)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: AppDimensions.paddingSmall,
+                    mainAxisSpacing: AppDimensions.paddingSmall,
+                    childAspectRatio: 1.5,
+                  ),
+                  itemCount: subcategories.length,
+                  itemBuilder: (context, index) {
+                    final subcategory = subcategories[index];
+                    return _buildSubcategoryCard(subcategory, color);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSubcategoryCard(Category subcategory, Color color) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CategoryDetailScreen(category: subcategory),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        child: Container(
+          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.folder, color: Colors.white, size: 20),
+                  const SizedBox(width: AppDimensions.paddingSmall),
+                  Expanded(
+                    child: Text(
+                      subcategory.name,
+                      style: AppTextStyles.bodyMedium(context).copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '${subcategory.entries.length} entries',
+                style: AppTextStyles.bodySmall(
+                  context,
+                ).copyWith(color: Colors.white.withOpacity(0.8)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEntriesSection(Category category, Color color) {
+    if (category.entries.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.note, color: color),
+                const SizedBox(width: AppDimensions.paddingSmall),
+                Text('Entries', style: AppTextStyles.headline2(context)),
+              ],
+            ),
+            const SizedBox(height: AppDimensions.paddingLarge),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.note_add,
+                    size: 64,
+                    color: AppColors.textHint(context),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingMedium),
+                  Text(
+                    'No entries yet',
+                    style: AppTextStyles.headline2(
+                      context,
+                    ).copyWith(color: AppColors.textHint(context)),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingSmall),
+                  Text(
+                    'Add your first entry using the + button',
+                    style: AppTextStyles.bodyMedium(
+                      context,
+                    ).copyWith(color: AppColors.textHint(context)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.note, color: color),
+              const SizedBox(width: AppDimensions.paddingSmall),
+              Text('Entries', style: AppTextStyles.headline2(context)),
+              const Spacer(),
+              Text(
+                '${category.entries.length} entries',
+                style: AppTextStyles.bodySmall(
+                  context,
+                ).copyWith(color: AppColors.textSecondary(context)),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.paddingMedium),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: category.entries.length,
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: AppDimensions.paddingMedium),
+            itemBuilder: (context, index) {
+              final entry = category.entries[index];
+              return _buildEntryCard(entry, color);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddSubcategoryDialog(String parentId, String parentColor) {
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (context) => AddSubcategoryDialog(
+        parentCategoryId: parentId,
+        parentCategoryColor: parentColor,
+      ),
+    );
   }
 }

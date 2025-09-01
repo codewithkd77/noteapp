@@ -146,7 +146,7 @@ class _TaskItemState extends State<TaskItem> {
         Expanded(
           child: Text(
             widget.task.title,
-            style: AppTextStyles.bodyMedium(context).copyWith(
+            style: AppTextStyles.bodyLarge(context).copyWith(
               decoration: widget.task.isCompleted
                   ? TextDecoration.lineThrough
                   : null,
@@ -166,7 +166,7 @@ class _TaskItemState extends State<TaskItem> {
       children: [
         Text(
           widget.task.title,
-          style: AppTextStyles.bodyMedium(context).copyWith(
+          style: AppTextStyles.bodyLarge(context).copyWith(
             fontWeight: FontWeight.w500,
             color: AppColors.textPrimary(context),
           ),
@@ -208,7 +208,7 @@ class _TaskItemState extends State<TaskItem> {
       children: [
         Text(
           widget.task.title,
-          style: AppTextStyles.bodyMedium(context).copyWith(
+          style: AppTextStyles.bodyLarge(context).copyWith(
             fontWeight: FontWeight.w500,
             color: AppColors.textPrimary(context),
           ),

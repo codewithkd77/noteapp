@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/app_theme.dart';
 import '../screens/settings_screen.dart';
+import '../screens/monthly_reports_screen.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final Function(int)? onNavigationSelected;
+  final int currentIndex;
+
+  const AppDrawer({
+    super.key,
+    this.onNavigationSelected,
+    this.currentIndex = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +52,73 @@ class AppDrawer extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
+                // Navigation Section
+                Padding(
+                  padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+                  child: Text(
+                    'NAVIGATE',
+                    style: AppTextStyles.caption(context).copyWith(
+                      color: AppColors.textSecondary(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.home,
+                  title: 'Home',
+                  isSelected: currentIndex == 0,
+                  onTap: () => _navigateToSection(context, 0),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.category,
+                  title: 'Categories',
+                  isSelected: currentIndex == 1,
+                  onTap: () => _navigateToSection(context, 1),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.schedule,
+                  title: 'Hourly Tasks',
+                  isSelected: currentIndex == 2,
+                  onTap: () => _navigateToSection(context, 2),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.search,
+                  title: 'Search',
+                  isSelected: currentIndex == 3,
+                  onTap: () => _navigateToSection(context, 3),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.calendar_today,
+                  title: 'Calendar',
+                  isSelected: currentIndex == 4,
+                  onTap: () => _navigateToSection(context, 4),
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.book,
+                  title: 'Journal',
+                  isSelected: currentIndex == 5,
+                  onTap: () => _navigateToSection(context, 5),
+                ),
+
+                const Divider(),
+
+                // Other Options Section
+                Padding(
+                  padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+                  child: Text(
+                    'OTHER OPTIONS',
+                    style: AppTextStyles.caption(context).copyWith(
+                      color: AppColors.textSecondary(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 _buildDrawerItem(
                   context,
                   icon: Icons.picture_as_pdf,
@@ -77,10 +152,26 @@ class AppDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    bool isSelected = false,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary(context)),
-      title: Text(title, style: AppTextStyles.bodyMedium(context)),
+      leading: Icon(
+        icon,
+        color: isSelected
+            ? AppColors.primary(context)
+            : AppColors.textSecondary(context),
+      ),
+      title: Text(
+        title,
+        style: AppTextStyles.bodyMedium(context).copyWith(
+          color: isSelected
+              ? AppColors.primary(context)
+              : AppColors.textPrimary(context),
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      selectedTileColor: AppColors.primary(context).withOpacity(0.1),
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
@@ -96,11 +187,17 @@ class AppDrawer extends StatelessWidget {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
   }
 
+  void _navigateToSection(BuildContext context, int index) {
+    Navigator.of(context).pop();
+    if (onNavigationSelected != null) {
+      onNavigationSelected!(index);
+    }
+  }
+
   void _showMonthlyReports(BuildContext context) {
     Navigator.of(context).pop();
-    // TODO: Implement monthly reports screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Monthly reports feature coming soon!')),
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const MonthlyReportsScreen()),
     );
   }
 }

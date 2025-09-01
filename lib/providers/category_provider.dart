@@ -23,7 +23,11 @@ class CategoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addCategory(String name, String color) async {
+  Future<void> addCategory(
+    String name,
+    String color, {
+    String? parentId,
+  }) async {
     try {
       final category = Category(
         id: 'category_${DateTime.now().millisecondsSinceEpoch}',
@@ -31,10 +35,19 @@ class CategoryProvider extends ChangeNotifier {
         color: color,
         entries: [],
         createdAt: DateTime.now(),
+        parentId: parentId,
       );
 
       await DatabaseService.addCategory(category);
       _categories.add(category);
+
+      // If this is a subcategory, update the parent's subcategory list
+      if (parentId != null) {
+        final parentCategory = _categories.firstWhere((c) => c.id == parentId);
+        parentCategory.subcategoryIds.add(category.id);
+        await DatabaseService.updateCategory(parentCategory);
+      }
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding category: $e');
@@ -66,35 +79,45 @@ class CategoryProvider extends ChangeNotifier {
 
   Future<void> addCategoryEntry(
     String categoryId,
-    String content, {
+    String description, {
     String? title,
-    String? description,
     String? link,
   }) async {
     try {
+      debugPrint('Adding entry to category: $categoryId');
+      debugPrint('Description: $description');
+      debugPrint('Title: $title');
+      debugPrint('Link: $link');
+
       final category = _categories.firstWhere((c) => c.id == categoryId);
+      debugPrint('Found category: ${category.name}');
+
       final entry = CategoryEntry(
         id: 'entry_${DateTime.now().millisecondsSinceEpoch}',
-        content: content.isEmpty ? (title ?? 'Untitled') : content,
+        content: description,
         createdAt: DateTime.now(),
         title: title,
         description: description,
         link: link,
       );
 
+      debugPrint('Created entry with ID: ${entry.id}');
       category.entries.add(entry);
+      debugPrint('Category now has ${category.entries.length} entries');
+
       await updateCategory(category);
+      debugPrint('Category updated in database');
     } catch (e) {
       debugPrint('Error adding category entry: $e');
+      rethrow;
     }
   }
 
   Future<void> updateCategoryEntry(
     String categoryId,
     String entryId,
-    String newContent, {
+    String description, {
     String? title,
-    String? description,
     String? link,
   }) async {
     try {
@@ -103,7 +126,7 @@ class CategoryProvider extends ChangeNotifier {
 
       if (entryIndex != -1) {
         final entry = category.entries[entryIndex];
-        entry.content = newContent.isEmpty ? (title ?? 'Untitled') : newContent;
+        entry.content = description;
         entry.title = title;
         entry.description = description;
         entry.link = link;
@@ -131,5 +154,20 @@ class CategoryProvider extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  // Get only main categories (no parent)
+  List<Category> get mainCategories =>
+      _categories.where((c) => c.isMainCategory).toList();
+
+  // Get subcategories for a parent category
+  List<Category> getSubcategories(String parentId) {
+    return _categories.where((c) => c.parentId == parentId).toList();
+  }
+
+  // Get all subcategories for a parent with their entries count
+  List<Category> getSubcategoriesWithEntries(String parentId) {
+    final subcategories = getSubcategories(parentId);
+    return subcategories..sort((a, b) => a.name.compareTo(b.name));
   }
 }

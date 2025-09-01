@@ -32,7 +32,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final categories = categoryProvider.categories;
+          final categories = categoryProvider.mainCategories;
 
           if (categories.isEmpty) {
             return Center(

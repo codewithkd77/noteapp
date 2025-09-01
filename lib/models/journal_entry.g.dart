@@ -20,9 +20,9 @@ class JournalEntryAdapter extends TypeAdapter<JournalEntry> {
       id: fields[0] as String,
       title: fields[1] as String,
       content: fields[2] as String,
-      type: fields[3] as JournalType,
-      createdAt: fields[4] as DateTime,
-      updatedAt: fields[5] as DateTime,
+      createdAt: fields[3] as DateTime,
+      updatedAt: fields[4] as DateTime,
+      type: fields[5] as JournalType,
       mood: fields[6] as String?,
       tags: (fields[7] as List).cast<String>(),
     );
@@ -39,11 +39,11 @@ class JournalEntryAdapter extends TypeAdapter<JournalEntry> {
       ..writeByte(2)
       ..write(obj.content)
       ..writeByte(3)
-      ..write(obj.type)
-      ..writeByte(4)
       ..write(obj.createdAt)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.updatedAt)
+      ..writeByte(5)
+      ..write(obj.type)
       ..writeByte(6)
       ..write(obj.mood)
       ..writeByte(7)

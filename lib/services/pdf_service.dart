@@ -4,8 +4,10 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:hive/hive.dart';
 import '../models/task.dart';
 import '../models/category.dart';
+import '../models/hourly_activity.dart';
 import 'database_service.dart';
 
 class PdfService {
@@ -17,6 +19,19 @@ class PdfService {
     final tasks = DatabaseService.getTasksForMonth(year, month);
     final categories = DatabaseService.getCategories();
 
+    // Get hourly activities for the month
+    final hourlyActivitiesBox = await Hive.openBox<HourlyActivity>(
+      'hourlyActivities',
+    );
+    final hourlyActivities = hourlyActivitiesBox.values
+        .where(
+          (activity) =>
+              activity.date.year == year &&
+              activity.date.month == month &&
+              activity.activity.isNotEmpty,
+        )
+        .toList();
+
     // Group tasks by date
     final tasksByDate = <String, List<Task>>{};
     for (final task in tasks) {
@@ -27,9 +42,26 @@ class PdfService {
       tasksByDate[dateKey]!.add(task);
     }
 
+    // Group hourly activities by date
+    final activitiesByDate = <String, List<HourlyActivity>>{};
+    for (final activity in hourlyActivities) {
+      final dateKey =
+          '${activity.date.year}-${activity.date.month.toString().padLeft(2, '0')}-${activity.date.day.toString().padLeft(2, '0')}';
+      if (!activitiesByDate.containsKey(dateKey)) {
+        activitiesByDate[dateKey] = [];
+      }
+      activitiesByDate[dateKey]!.add(activity);
+    }
+
     // Create PDF pages
     await _addCoverPage(pdf, monthName);
-    await _addDailyChecklistPages(pdf, tasksByDate, year, month);
+    await _addDailyChecklistPages(
+      pdf,
+      tasksByDate,
+      activitiesByDate,
+      year,
+      month,
+    );
     await _addCategoryPages(pdf, categories);
 
     // Save PDF to device
@@ -76,6 +108,7 @@ class PdfService {
   static Future<void> _addDailyChecklistPages(
     pw.Document pdf,
     Map<String, List<Task>> tasksByDate,
+    Map<String, List<HourlyActivity>> activitiesByDate,
     int year,
     int month,
   ) async {
@@ -87,6 +120,10 @@ class PdfService {
       final dateKey =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       final dayTasks = tasksByDate[dateKey] ?? [];
+      final dayActivities = activitiesByDate[dateKey] ?? [];
+
+      // Sort activities by hour
+      dayActivities.sort((a, b) => a.hour.compareTo(b.hour));
 
       pdf.addPage(
         pw.Page(
@@ -114,21 +151,21 @@ class PdfService {
                 ),
                 pw.SizedBox(height: 20),
 
-                // Tasks
-                if (dayTasks.isEmpty)
+                // Tasks Section
+                if (dayTasks.isNotEmpty) ...[
                   pw.Text(
-                    'No tasks for this day',
+                    'Tasks',
                     style: pw.TextStyle(
-                      fontSize: 14,
-                      color: PdfColors.grey,
-                      fontStyle: pw.FontStyle.italic,
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.indigo,
                     ),
-                  )
-                else
+                  ),
+                  pw.SizedBox(height: 12),
                   pw.Column(
                     children: dayTasks.map((task) {
                       return pw.Container(
-                        margin: const pw.EdgeInsets.only(bottom: 12),
+                        margin: const pw.EdgeInsets.only(bottom: 8),
                         padding: const pw.EdgeInsets.all(12),
                         decoration: pw.BoxDecoration(
                           border: pw.Border.all(color: PdfColors.grey300),
@@ -141,7 +178,7 @@ class PdfService {
                               child: pw.Text(
                                 task.timeString,
                                 style: pw.TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   fontWeight: pw.FontWeight.bold,
                                   color: PdfColors.indigo,
                                 ),
@@ -151,7 +188,7 @@ class PdfService {
                               child: pw.Text(
                                 task.title,
                                 style: pw.TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   decoration: task.isCompleted
                                       ? pw.TextDecoration.lineThrough
                                       : null,
@@ -159,8 +196,8 @@ class PdfService {
                               ),
                             ),
                             pw.Container(
-                              width: 16,
-                              height: 16,
+                              width: 14,
+                              height: 14,
                               decoration: pw.BoxDecoration(
                                 border: pw.Border.all(color: PdfColors.grey),
                                 borderRadius: pw.BorderRadius.circular(2),
@@ -173,7 +210,7 @@ class PdfService {
                                       child: pw.Text(
                                         '✓',
                                         style: pw.TextStyle(
-                                          fontSize: 10,
+                                          fontSize: 8,
                                           color: PdfColors.white,
                                         ),
                                       ),
@@ -184,6 +221,74 @@ class PdfService {
                         ),
                       );
                     }).toList(),
+                  ),
+                  pw.SizedBox(height: 20),
+                ],
+
+                // Hourly Activities Section
+                if (dayActivities.isNotEmpty) ...[
+                  pw.Text(
+                    'Hourly Activities',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.purple,
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
+                  pw.Expanded(
+                    child: pw.Column(
+                      children: dayActivities.map((activity) {
+                        return pw.Container(
+                          margin: const pw.EdgeInsets.only(bottom: 8),
+                          padding: const pw.EdgeInsets.all(10),
+                          decoration: pw.BoxDecoration(
+                            color: PdfColors.purple50,
+                            border: pw.Border.all(color: PdfColors.purple200),
+                            borderRadius: pw.BorderRadius.circular(6),
+                          ),
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Container(
+                                width: 80,
+                                child: pw.Text(
+                                  _getHourDisplay(activity.hour),
+                                  style: pw.TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: PdfColors.purple,
+                                  ),
+                                ),
+                              ),
+                              pw.Expanded(
+                                child: pw.Text(
+                                  activity.activity,
+                                  style: pw.TextStyle(
+                                    fontSize: 11,
+                                    color: PdfColors.purple800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+
+                // Empty day message
+                if (dayTasks.isEmpty && dayActivities.isEmpty)
+                  pw.Center(
+                    child: pw.Text(
+                      'No tasks or activities for this day',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        color: PdfColors.grey,
+                        fontStyle: pw.FontStyle.italic,
+                      ),
+                    ),
                   ),
               ],
             );
@@ -278,6 +383,13 @@ class PdfService {
       ((color >> 8) & 0xFF) / 255,
       (color & 0xFF) / 255,
     );
+  }
+
+  static String _getHourDisplay(int hour) {
+    if (hour == 0) return '12:00 AM';
+    if (hour < 12) return '$hour:00 AM';
+    if (hour == 12) return '12:00 PM';
+    return '${hour - 12}:00 PM';
   }
 
   static Future<void> sharePdf(File pdfFile) async {

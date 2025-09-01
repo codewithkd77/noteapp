@@ -22,6 +22,12 @@ class Category extends HiveObject {
   @HiveField(5)
   DateTime? updatedAt;
 
+  @HiveField(6)
+  String? parentId; // null for main categories, set for subcategories
+
+  @HiveField(7)
+  List<String> subcategoryIds; // IDs of subcategories
+
   Category({
     required this.id,
     required this.name,
@@ -29,7 +35,14 @@ class Category extends HiveObject {
     required this.entries,
     required this.createdAt,
     this.updatedAt,
-  });
+    this.parentId,
+    List<String>? subcategoryIds,
+  }) : subcategoryIds = subcategoryIds ?? [];
+
+  // Helper methods
+  bool get isMainCategory => parentId == null;
+  bool get isSubcategory => parentId != null;
+  bool get hasSubcategories => subcategoryIds.isNotEmpty;
 }
 
 @HiveType(typeId: 2)

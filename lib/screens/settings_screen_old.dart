@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../utils/app_theme.dart';
 import '../providers/theme_provider.dart';
+import 'monthly_reports_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -65,6 +66,13 @@ class SettingsScreen extends StatelessWidget {
             context: context,
             title: 'Data',
             children: [
+              _buildSettingItem(
+                context,
+                icon: Icons.picture_as_pdf,
+                title: 'Monthly Export',
+                subtitle: 'Generate PDF reports for any month',
+                onTap: () => _navigateToMonthlyReports(context),
+              ),
               _buildSettingItem(
                 context,
                 icon: Icons.delete_forever,
@@ -271,6 +279,12 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _navigateToMonthlyReports(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const MonthlyReportsScreen()),
     );
   }
 }
