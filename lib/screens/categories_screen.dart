@@ -25,12 +25,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Categories'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      backgroundColor: AppColors.background(context),
       body: Consumer<CategoryProvider>(
         builder: (context, categoryProvider, child) {
           if (categoryProvider.isLoading) {
@@ -44,20 +39,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.category, size: 64, color: AppColors.textHint),
+                  Icon(
+                    Icons.category,
+                    size: 64,
+                    color: AppColors.textHint(context),
+                  ),
                   const SizedBox(height: AppDimensions.paddingMedium),
                   Text(
                     'No categories yet',
-                    style: AppTextStyles.headline2.copyWith(
-                      color: AppColors.textHint,
-                    ),
+                    style: AppTextStyles.headline2(
+                      context,
+                    ).copyWith(color: AppColors.textHint(context)),
                   ),
                   const SizedBox(height: AppDimensions.paddingSmall),
                   Text(
                     'Tap the + button to add a category',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textHint,
-                    ),
+                    style: AppTextStyles.bodyMedium(
+                      context,
+                    ).copyWith(color: AppColors.textHint(context)),
                   ),
                 ],
               ),

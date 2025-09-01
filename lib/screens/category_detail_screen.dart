@@ -33,7 +33,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     final color = AppColors.fromHex(widget.category.color);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.background(context),
       appBar: AppBar(
         title: Text(widget.category.name),
         backgroundColor: color,
@@ -83,15 +83,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                             children: [
                               Text(
                                 category.name,
-                                style: AppTextStyles.headline1.copyWith(
-                                  color: Colors.white,
-                                ),
+                                style: AppTextStyles.headline1(
+                                  context,
+                                ).copyWith(color: Colors.white),
                               ),
                               Text(
                                 '${category.entries.length} entries',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
+                                style: AppTextStyles.bodyMedium(context)
+                                    .copyWith(
+                                      color: Colors.white.withOpacity(0.8),
+                                    ),
                               ),
                             ],
                           ),
@@ -101,9 +102,9 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     const SizedBox(height: AppDimensions.paddingMedium),
                     Text(
                       'Created ${date_utils.DateUtils.formatDate(category.createdAt)}',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.white.withOpacity(0.7),
-                      ),
+                      style: AppTextStyles.bodySmall(
+                        context,
+                      ).copyWith(color: Colors.white.withOpacity(0.7)),
                     ),
                   ],
                 ),
@@ -119,21 +120,21 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                             Icon(
                               Icons.note_add,
                               size: 64,
-                              color: AppColors.textHint,
+                              color: AppColors.textHint(context),
                             ),
                             const SizedBox(height: AppDimensions.paddingMedium),
                             Text(
                               'No entries yet',
-                              style: AppTextStyles.headline2.copyWith(
-                                color: AppColors.textHint,
-                              ),
+                              style: AppTextStyles.headline2(
+                                context,
+                              ).copyWith(color: AppColors.textHint(context)),
                             ),
                             const SizedBox(height: AppDimensions.paddingSmall),
                             Text(
                               'Add your first entry using the text field below',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textHint,
-                              ),
+                              style: AppTextStyles.bodyMedium(
+                                context,
+                              ).copyWith(color: AppColors.textHint(context)),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -198,9 +199,9 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                         if (entry.title?.isNotEmpty == true) ...[
                           Text(
                             entry.title!,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: AppTextStyles.bodyLarge(
+                              context,
+                            ).copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: AppDimensions.paddingSmall),
                         ],
@@ -210,7 +211,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                           entry.description?.isNotEmpty == true
                               ? entry.description!
                               : entry.content,
-                          style: AppTextStyles.bodyMedium,
+                          style: AppTextStyles.bodyMedium(context),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -225,16 +226,17 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                                 Icon(
                                   Icons.link,
                                   size: 16,
-                                  color: AppColors.primary,
+                                  color: AppColors.primary(context),
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     entry.link!,
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.primary,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                                    style: AppTextStyles.caption(context)
+                                        .copyWith(
+                                          color: AppColors.primary(context),
+                                          decoration: TextDecoration.underline,
+                                        ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -249,14 +251,14 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                           children: [
                             Text(
                               'Created ${date_utils.DateUtils.formatDateTime(entry.createdAt)}',
-                              style: AppTextStyles.caption,
+                              style: AppTextStyles.caption(context),
                             ),
                             if (entry.updatedAt != null)
                               Text(
                                 'Edited ${date_utils.DateUtils.formatRelativeTime(entry.updatedAt!)}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.primary,
-                                ),
+                                style: AppTextStyles.caption(
+                                  context,
+                                ).copyWith(color: AppColors.primary(context)),
                               ),
                           ],
                         ),

@@ -66,9 +66,9 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               // Task Type Selection
               Text(
                 'Task Type',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.bodyMedium(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppDimensions.paddingSmall),
               DropdownButtonFormField<TaskType>(
@@ -140,9 +140,9 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               // Frequency Selection
               Text(
                 'Frequency',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.bodyMedium(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppDimensions.paddingSmall),
               RadioListTile<bool>(
@@ -175,9 +175,9 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               // Time Selection
               Text(
                 'Time',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.bodyMedium(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppDimensions.paddingSmall),
               InkWell(
@@ -185,7 +185,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AppColors.border(context)),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(

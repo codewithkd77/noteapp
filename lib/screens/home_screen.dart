@@ -7,7 +7,6 @@ import '../utils/app_theme.dart';
 import '../utils/date_utils.dart' as date_utils;
 import '../widgets/task_item.dart';
 import '../widgets/add_task_dialog.dart';
-import '../widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,75 +45,80 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      drawer: const AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Consumer<TaskProvider>(
-          builder: (context, taskProvider, child) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: AppColors.background(context),
+      body: Column(
+        children: [
+          // Date and time header
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  date_utils.DateUtils.formatDayDate(_currentDate),
-                  style: AppTextStyles.headline2,
-                ),
-                StreamBuilder<DateTime>(
-                  stream: Stream.periodic(
-                    const Duration(seconds: 1),
-                    (_) => DateTime.now(),
-                  ),
-                  builder: (context, snapshot) {
-                    final now = snapshot.data ?? DateTime.now();
-                    return Text(
-                      DateFormat('hh:mm:ss a').format(now),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primary,
-                      ),
+                Consumer<TaskProvider>(
+                  builder: (context, taskProvider, child) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          date_utils.DateUtils.formatDayDate(_currentDate),
+                          style: AppTextStyles.headline2(context),
+                        ),
+                        StreamBuilder<DateTime>(
+                          stream: Stream.periodic(
+                            const Duration(seconds: 1),
+                            (_) => DateTime.now(),
+                          ),
+                          builder: (context, snapshot) {
+                            final now = snapshot.data ?? DateTime.now();
+                            return Text(
+                              DateFormat('hh:mm:ss a').format(now),
+                              style: AppTextStyles.bodySmall(
+                                context,
+                              ).copyWith(color: AppColors.primary(context)),
+                            );
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),
-              ],
-            );
-          },
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppDimensions.paddingMedium),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('Hello,', style: AppTextStyles.bodySmall),
-                Text(
-                  'User', // TODO: Get from settings
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Hello,', style: AppTextStyles.bodySmall(context)),
+                    Text(
+                      'User', // TODO: Get from settings
+                      style: AppTextStyles.bodyMedium(
+                        context,
+                      ).copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      body: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          final baseDate = DateTime.now();
-          final daysOffset = index - 1000;
-          setState(() {
-            _currentDate = baseDate.add(Duration(days: daysOffset));
-          });
-          context.read<TaskProvider>().setSelectedDate(_currentDate);
-        },
-        itemBuilder: (context, index) {
-          final baseDate = DateTime.now();
-          final daysOffset = index - 1000;
-          final pageDate = baseDate.add(Duration(days: daysOffset));
+          // Page view for date navigation
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                final baseDate = DateTime.now();
+                final daysOffset = index - 1000;
+                setState(() {
+                  _currentDate = baseDate.add(Duration(days: daysOffset));
+                });
+                context.read<TaskProvider>().setSelectedDate(_currentDate);
+              },
+              itemBuilder: (context, index) {
+                final baseDate = DateTime.now();
+                final daysOffset = index - 1000;
+                final pageDate = baseDate.add(Duration(days: daysOffset));
 
-          return _buildDayView(pageDate);
-        },
+                return _buildDayView(pageDate);
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTaskDialog,
@@ -143,21 +147,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icon(
                   Icons.event_available,
                   size: 64,
-                  color: AppColors.textHint,
+                  color: AppColors.textHint(context),
                 ),
                 const SizedBox(height: AppDimensions.paddingMedium),
                 Text(
                   'No tasks for this day',
-                  style: AppTextStyles.headline2.copyWith(
-                    color: AppColors.textHint,
-                  ),
+                  style: AppTextStyles.headline2(
+                    context,
+                  ).copyWith(color: AppColors.textHint(context)),
                 ),
                 const SizedBox(height: AppDimensions.paddingSmall),
                 Text(
                   'Tap the + button to add a task',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textHint,
-                  ),
+                  style: AppTextStyles.bodyMedium(
+                    context,
+                  ).copyWith(color: AppColors.textHint(context)),
                 ),
               ],
             ),

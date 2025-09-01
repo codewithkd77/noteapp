@@ -42,9 +42,9 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
           const SizedBox(height: AppDimensions.paddingLarge),
           Text(
             'Choose Color:',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.bodyMedium(
+              context,
+            ).copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppDimensions.paddingMedium),
           Wrap(
@@ -64,7 +64,7 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: _selectedColorIndex == index
-                          ? AppColors.textPrimary
+                          ? AppColors.textPrimary(context)
                           : Colors.transparent,
                       width: 3,
                     ),

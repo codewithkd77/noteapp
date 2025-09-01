@@ -2,6 +2,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/task.dart';
 import '../models/category.dart';
 import '../models/user_settings.dart';
+import '../models/hourly_activity.dart';
+import '../models/journal_entry.dart';
 
 class DatabaseService {
   static const String _tasksBoxName = 'tasks';
@@ -22,6 +24,9 @@ class DatabaseService {
     Hive.registerAdapter(CategoryAdapter());
     Hive.registerAdapter(CategoryEntryAdapter());
     Hive.registerAdapter(UserSettingsAdapter());
+    Hive.registerAdapter(HourlyActivityAdapter());
+    Hive.registerAdapter(JournalEntryAdapter());
+    Hive.registerAdapter(JournalTypeAdapter());
 
     // Open boxes
     _tasksBox = await Hive.openBox<Task>(_tasksBoxName);

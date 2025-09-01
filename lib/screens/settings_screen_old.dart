@@ -24,7 +24,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Personal',
             children: [
               _buildSettingItem(
-                context: context,
+                context,
                 icon: Icons.person,
                 title: 'Username',
                 subtitle: 'User', // TODO: Get from user settings
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
               Consumer<ThemeProvider>(
                 builder: (context, themeProvider, child) {
                   return _buildSettingItem(
-                    context: context,
+                    context,
                     icon: Icons.palette,
                     title: 'Theme',
                     subtitle: themeProvider.themeName,
@@ -66,7 +66,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Data',
             children: [
               _buildSettingItem(
-                context: context,
+                context,
                 icon: Icons.delete_forever,
                 title: 'Clear All Data',
                 subtitle: 'Delete all tasks and categories',
@@ -83,13 +83,13 @@ class SettingsScreen extends StatelessWidget {
             title: 'About',
             children: [
               _buildSettingItem(
-                context: context,
+                context,
                 icon: Icons.info,
                 title: 'App Version',
                 subtitle: '1.0.0',
               ),
               _buildSettingItem(
-                context: context,
+                context,
                 icon: Icons.bug_report,
                 title: 'Report a Bug',
                 subtitle: 'Help us improve the app',
@@ -98,7 +98,7 @@ class SettingsScreen extends StatelessWidget {
                 },
               ),
               _buildSettingItem(
-                context: context,
+                context,
                 icon: Icons.star,
                 title: 'Rate App',
                 subtitle: 'Rate us on the app store',
@@ -138,8 +138,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingItem({
-    required BuildContext context,
+  Widget _buildSettingItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     String? subtitle,
@@ -148,19 +148,15 @@ class SettingsScreen extends StatelessWidget {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: textColor ?? Theme.of(context).colorScheme.primary,
-      ),
+      leading: Icon(icon, color: textColor ?? AppColors.primary(context)),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w500,
-        ),
+        style: AppTextStyles.bodyMedium(
+          context,
+        ).copyWith(color: textColor, fontWeight: FontWeight.w500),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: Theme.of(context).textTheme.bodySmall)
+          ? Text(subtitle, style: AppTextStyles.bodySmall(context))
           : null,
       trailing:
           trailing ??
@@ -210,10 +206,7 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Change Username',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        title: Text('Change Username', style: AppTextStyles.headline2(context)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -231,13 +224,11 @@ class SettingsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(
                     AppDimensions.radiusSmall,
                   ),
-                  borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  borderSide: BorderSide(color: AppColors.primary(context)),
                 ),
               ),
               maxLength: 30,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: AppTextStyles.bodyMedium(context),
             ),
           ],
         ),
@@ -249,9 +240,9 @@ class SettingsScreen extends StatelessWidget {
             },
             child: Text(
               'Cancel',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: AppTextStyles.bodyMedium(
+                context,
+              ).copyWith(color: AppColors.textSecondary(context)),
             ),
           ),
           ElevatedButton(
@@ -270,8 +261,8 @@ class SettingsScreen extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: AppColors.primary(context),
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
               ),

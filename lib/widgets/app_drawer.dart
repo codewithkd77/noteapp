@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/app_theme.dart';
-import '../screens/categories_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/calendar_screen.dart';
 import '../screens/settings_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -15,11 +12,14 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppColors.primary, AppColors.secondary],
+                colors: [
+                  AppColors.primary(context),
+                  AppColors.secondary(context),
+                ],
               ),
             ),
             child: const Center(
@@ -46,33 +46,6 @@ class AppDrawer extends StatelessWidget {
               children: [
                 _buildDrawerItem(
                   context,
-                  icon: Icons.home,
-                  title: 'Home',
-                  onTap: () => Navigator.of(context).pop(),
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.category,
-                  title: 'Categories',
-                  onTap: () =>
-                      _navigateToScreen(context, const CategoriesScreen()),
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.search,
-                  title: 'Search',
-                  onTap: () => _navigateToScreen(context, const SearchScreen()),
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.calendar_today,
-                  title: 'Calendar',
-                  onTap: () =>
-                      _navigateToScreen(context, const CalendarScreen()),
-                ),
-                const Divider(),
-                _buildDrawerItem(
-                  context,
                   icon: Icons.picture_as_pdf,
                   title: 'Monthly Reports',
                   onTap: () => _showMonthlyReports(context),
@@ -89,7 +62,10 @@ class AppDrawer extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-            child: Text('Daily Planner v1.0.0', style: AppTextStyles.caption),
+            child: Text(
+              'Daily Planner v1.0.0',
+              style: AppTextStyles.caption(context),
+            ),
           ),
         ],
       ),
@@ -103,8 +79,8 @@ class AppDrawer extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title, style: AppTextStyles.bodyMedium),
+      leading: Icon(icon, color: AppColors.primary(context)),
+      title: Text(title, style: AppTextStyles.bodyMedium(context)),
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();

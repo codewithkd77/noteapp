@@ -59,14 +59,14 @@ class _TaskItemState extends State<TaskItem> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary(context).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     widget.task.timeString,
-                    style: AppTextStyles.caption.copyWith(
+                    style: AppTextStyles.caption(context).copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: AppColors.primary(context),
                     ),
                   ),
                 ),
@@ -129,7 +129,7 @@ class _TaskItemState extends State<TaskItem> {
               border: Border.all(
                 color: widget.task.isCompleted
                     ? AppColors.success
-                    : AppColors.border,
+                    : AppColors.border(context),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(4),
@@ -146,13 +146,13 @@ class _TaskItemState extends State<TaskItem> {
         Expanded(
           child: Text(
             widget.task.title,
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: AppTextStyles.bodyMedium(context).copyWith(
               decoration: widget.task.isCompleted
                   ? TextDecoration.lineThrough
                   : null,
               color: widget.task.isCompleted
-                  ? AppColors.textHint
-                  : AppColors.textPrimary,
+                  ? AppColors.textHint(context)
+                  : AppColors.textPrimary(context),
             ),
           ),
         ),
@@ -166,9 +166,9 @@ class _TaskItemState extends State<TaskItem> {
       children: [
         Text(
           widget.task.title,
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodyMedium(context).copyWith(
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: AppColors.textPrimary(context),
           ),
         ),
 
@@ -179,18 +179,18 @@ class _TaskItemState extends State<TaskItem> {
           decoration: InputDecoration(
             hintText: 'Enter your response...',
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: AppColors.surface(context),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.border(context)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary),
+              borderSide: BorderSide(color: AppColors.primary(context)),
             ),
             contentPadding: const EdgeInsets.all(12),
           ),
-          style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium(context),
           maxLines: 2,
           onChanged: (value) {
             final updatedTask = widget.task;
@@ -208,9 +208,9 @@ class _TaskItemState extends State<TaskItem> {
       children: [
         Text(
           widget.task.title,
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodyMedium(context).copyWith(
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: AppColors.textPrimary(context),
           ),
         ),
 
@@ -223,18 +223,18 @@ class _TaskItemState extends State<TaskItem> {
             decoration: InputDecoration(
               hintText: '0',
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: AppColors.surface(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.border(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.primary),
+                borderSide: BorderSide(color: AppColors.primary(context)),
               ),
               contentPadding: const EdgeInsets.all(12),
             ),
-            style: AppTextStyles.bodyMedium,
+            style: AppTextStyles.bodyMedium(context),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),

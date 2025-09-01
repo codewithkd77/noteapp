@@ -48,7 +48,7 @@ class CategoryCard extends StatelessWidget {
                     ),
                     child: Text(
                       '${category.entries.length}',
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: AppTextStyles.bodySmall(context).copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -59,10 +59,9 @@ class CategoryCard extends StatelessWidget {
               const Spacer(),
               Text(
                 category.name,
-                style: AppTextStyles.headline2.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyles.headline2(
+                  context,
+                ).copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -71,9 +70,9 @@ class CategoryCard extends StatelessWidget {
                 category.entries.isEmpty
                     ? 'No entries yet'
                     : 'Last updated ${_getLastUpdateText()}',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.white.withOpacity(0.8),
-                ),
+                style: AppTextStyles.bodySmall(
+                  context,
+                ).copyWith(color: Colors.white.withOpacity(0.8)),
               ),
             ],
           ),

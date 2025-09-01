@@ -104,9 +104,9 @@ class _AddCategoryEntryDialogState extends State<AddCategoryEntryDialog> {
                 const SizedBox(height: AppDimensions.paddingSmall),
                 Text(
                   'Tap the icon to test the link',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textHint,
-                  ),
+                  style: AppTextStyles.caption(
+                    context,
+                  ).copyWith(color: AppColors.textHint(context)),
                 ),
               ],
             ],

@@ -25,12 +25,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Search'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      backgroundColor: AppColors.background(context),
       body: Column(
         children: [
           // Search input
@@ -75,20 +70,24 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search, size: 64, color: AppColors.textHint),
+                        Icon(
+                          Icons.search,
+                          size: 64,
+                          color: AppColors.textHint(context),
+                        ),
                         const SizedBox(height: AppDimensions.paddingMedium),
                         Text(
                           'Search your tasks and categories',
-                          style: AppTextStyles.headline2.copyWith(
-                            color: AppColors.textHint,
-                          ),
+                          style: AppTextStyles.headline2(
+                            context,
+                          ).copyWith(color: AppColors.textHint(context)),
                         ),
                         const SizedBox(height: AppDimensions.paddingSmall),
                         Text(
                           'Enter keywords in the search box above',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textHint,
-                          ),
+                          style: AppTextStyles.bodyMedium(
+                            context,
+                          ).copyWith(color: AppColors.textHint(context)),
                         ),
                       ],
                     ),
@@ -105,21 +104,21 @@ class _SearchScreenState extends State<SearchScreen> {
                         Icon(
                           Icons.search_off,
                           size: 64,
-                          color: AppColors.textHint,
+                          color: AppColors.textHint(context),
                         ),
                         const SizedBox(height: AppDimensions.paddingMedium),
                         Text(
                           'No results found',
-                          style: AppTextStyles.headline2.copyWith(
-                            color: AppColors.textHint,
-                          ),
+                          style: AppTextStyles.headline2(
+                            context,
+                          ).copyWith(color: AppColors.textHint(context)),
                         ),
                         const SizedBox(height: AppDimensions.paddingSmall),
                         Text(
                           'Try different keywords',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textHint,
-                          ),
+                          style: AppTextStyles.bodyMedium(
+                            context,
+                          ).copyWith(color: AppColors.textHint(context)),
                         ),
                       ],
                     ),
@@ -172,11 +171,13 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: Text(
           category.name,
-          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyMedium(
+            context,
+          ).copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           '${category.entries.length} entries',
-          style: AppTextStyles.bodySmall,
+          style: AppTextStyles.bodySmall(context),
         ),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
@@ -189,19 +190,19 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildCategoryEntryResult(CategoryEntry entry) {
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: AppColors.accent,
-          child: Icon(Icons.note, color: Colors.white),
+        leading: CircleAvatar(
+          backgroundColor: AppColors.accent(context),
+          child: const Icon(Icons.note, color: Colors.white),
         ),
         title: Text(
           entry.content,
-          style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium(context),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
           'Created ${entry.formattedTimestamp}',
-          style: AppTextStyles.bodySmall,
+          style: AppTextStyles.bodySmall(context),
         ),
         onTap: () {
           // TODO: Navigate to category entry
